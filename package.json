@@ -1,0 +1,23 @@
+{
+  "name": "advent-of-code",
+  "version": "1.0.0",
+  "description": "private project just for solving/testing advent of code puzzles",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "day1": "ts-node ./src/day1/interpolate-calibration-code.ts",
+    "day2": "ts-node ./src/day2/get-code.ts",
+    "day3": "ts-node ./src/day3/get-code.ts"
+  },
+  "author": "sarah-mica",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@types/node": "^20.10.5",
+    "jwt-decode": "^3.1.2",
+    "regexpu": "^4.8.0"
+  }
+}
