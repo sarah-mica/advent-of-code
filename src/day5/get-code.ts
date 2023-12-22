@@ -158,7 +158,6 @@ function parseMap(file: string, startIndex: number, endIndex: number): Object {
         const destRangeStart = parseInt(split[0]);
         const sourceRangeStart = parseInt(split[1]);
         const rangeLength = parseInt(split[2]);
-        console.log(`destStart: ${destRangeStart}, sourceStart: ${sourceRangeStart}, range: ${rangeLength}`);
 
         map[sourceRangeStart] = [destRangeStart, rangeLength];
     }
@@ -172,7 +171,7 @@ function getMappingDest(map: Object, val: number): number {
     for (const key of keys) {
         const sourceRangeStart = parseInt(key);
         const range = (map[key])[1];
-        if (val >= sourceRangeStart && val <= (sourceRangeStart + range)) {
+        if (val >= sourceRangeStart && val < (sourceRangeStart + range)) {
             const destVal = (map[key])[0];
             console.log(`Found destination: ${destVal}, val: ${val}, key: ${key}`)
             return destVal + (val - sourceRangeStart);
