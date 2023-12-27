@@ -60,26 +60,24 @@ function getNumWaysToWinRace(totalRaceSeconds: number, bestDistance: number): nu
     // for the total amount of time you have, check every possible "boat charging" time 
     // and how far it would get you
     let waysToWin = 0;
-    //console.log(`time: ${totalRaceSeconds}, best distance: ${bestDistance}`);
-    for (let i=0; i<totalRaceSeconds; i++) {
+    for (let i=0; i<=totalRaceSeconds/2; i++) {
         // charging seconds (i) = the speed of the boat
         // the remaining time is how long you have to move at that speed
         const currDistance = i * (totalRaceSeconds - i);
-        //console.log(`speed: ${i}, dist: ${currDistance}`);
         if (currDistance > bestDistance) waysToWin++;
-        // TODO: I think we can memoize this somehow
     }
-    console.log(waysToWin);
-    return waysToWin;
+    if (totalRaceSeconds % 2 === 0) {
+        return waysToWin*2 - 1;
+    } else {
+        return waysToWin*2;
+    }
 }
 
 function getProductOfNumWaysToWinAllRaces(puzzleInput: string[]): number {
     const timeSplit = puzzleInput[0].split("Time: ");
     const times = timeSplit[1].trim().split(" ").filter((time) => time !== "");
-    console.log(times);
     const distSplit = puzzleInput[1].split("Distance: ");
     const bestDistances = distSplit[1].trim().split(" ").filter((dist) => dist !== "");
-    console.log(bestDistances);
 
     let product = 1;
     for (let i=0; i<times.length; i++) {
@@ -89,6 +87,18 @@ function getProductOfNumWaysToWinAllRaces(puzzleInput: string[]): number {
         product *= getNumWaysToWinRace(time, bestDistance);
     }
     return product;
+}
+
+function getProductOfNumWaysToWinAllRacesPart2(puzzleInput: string[]): number {
+    const timeSplit = puzzleInput[0].split("Time: ");
+    const timeStr = timeSplit[1].trim().replace(/\s/g, '');
+    const distSplit = puzzleInput[1].split("Distance: ");
+    const bestDistanceStr = distSplit[1].trim().replace(/\s/g, '');
+
+    const time = parseInt(timeStr);
+    const bestDistance = parseInt(bestDistanceStr);
+
+    return getNumWaysToWinRace(time, bestDistance);
 }
 
 // MAIN
@@ -102,5 +112,5 @@ const fileToRun = puzzleFileLoc;
 console.log(`Looking for file ${fileToRun}`);
 const puzzleFile = fs.readFileSync(fileToRun).toString();
 
-const result = getProductOfNumWaysToWinAllRaces(puzzleFile.split("\n"));
+const result = getProductOfNumWaysToWinAllRacesPart2(puzzleFile.split("\n"));
 console.log(result);
