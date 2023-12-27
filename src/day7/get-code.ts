@@ -51,7 +51,7 @@ const CARD_VALUE = Object.freeze({
     "A": 14, 
     "K": 13, 
     "Q": 12, 
-    "J": 11, 
+    "J": 1, // for a jack, this should be 11
     "T": 10,
     "9": 9,
     "8": 8, 
@@ -75,38 +75,92 @@ function addToDict(handValueDict: Object, key: number, val: string): void {
 function getHandType(hand: string): number {
     let handType = HAND_TYPE.HIGH_CARD;
     let previousMatch = "";
+    let possibleHands = [HAND_TYPE.HIGH_CARD];
+    const numJokers = charCount(hand, "J");
+    if (numJokers === 5) return HAND_TYPE.FIVE_OF_A_KIND;
+
     for (let j=0; j<hand.length; j++) {
+        if (hand[j] === "J") continue;
         const numInstances = charCount(hand, hand[j]);
+
         switch (numInstances) {
             case 5: 
                 return HAND_TYPE.FIVE_OF_A_KIND;
             case 4: 
-                return HAND_TYPE.FOUR_OF_A_KIND;
+                return numJokers === 1 ? HAND_TYPE.FIVE_OF_A_KIND : HAND_TYPE.FOUR_OF_A_KIND;
             case 3: 
                 // if it's a full house we would have seen two pair already or we will still see it so don't return yet
                 if (handType === HAND_TYPE.ONE_PAIR) {
-                    return HAND_TYPE.FULL_HOUSE;
-                } else {
-                    handType = HAND_TYPE.THREE_OF_A_KIND;
+                    handType = HAND_TYPE.FULL_HOUSE;
+                    possibleHands.push(handType);
                 }
+                switch(numJokers) {
+                    case 2:
+                        handType = HAND_TYPE.FIVE_OF_A_KIND;
+                        possibleHands.push(handType);
+                        break;
+                    case 1:
+                        handType = HAND_TYPE.FOUR_OF_A_KIND;
+                        possibleHands.push(handType);
+                        break;
+                    case 0:
+                        handType = HAND_TYPE.THREE_OF_A_KIND;
+                        possibleHands.push(handType);
+                        break;
+                }
+
                 break;
             case 2: 
-                if (handType === HAND_TYPE.THREE_OF_A_KIND) {
-                    return HAND_TYPE.FULL_HOUSE;
+                if (handType === HAND_TYPE.THREE_OF_A_KIND && previousMatch !== hand[j]) {
+                    handType = HAND_TYPE.FULL_HOUSE;
+                    possibleHands.push(handType);
                 } else if (handType === HAND_TYPE.ONE_PAIR && previousMatch !== hand[j]) {
-                    return HAND_TYPE.TWO_PAIR;
-                } else {
-                    handType = HAND_TYPE.ONE_PAIR;
-                    previousMatch = hand[j];
+                    handType = HAND_TYPE.TWO_PAIR;
+                    possibleHands.push(handType);
+                } 
+                switch(numJokers) {
+                    case 3:
+                        handType = HAND_TYPE.FIVE_OF_A_KIND;
+                        possibleHands.push(handType);
+                        break;
+                    case 2:
+                        handType = HAND_TYPE.FOUR_OF_A_KIND;
+                        possibleHands.push(handType);
+                        break;
+                    case 1: 
+                        handType = HAND_TYPE.THREE_OF_A_KIND;
+                        possibleHands.push(handType);
+                        previousMatch = hand[j];
+                        break;
+                    case 0:
+                        handType = HAND_TYPE.ONE_PAIR;
+                        previousMatch = hand[j];
+                        possibleHands.push(handType);
+                        break;
                 }
                 break;
             default:
+                switch(numJokers) {
+                    case 4:
+                        return HAND_TYPE.FIVE_OF_A_KIND;
+                    case 3:
+                        handType = HAND_TYPE.FOUR_OF_A_KIND;
+                        possibleHands.push(handType);
+                        break;
+                    case 2:
+                        handType = HAND_TYPE.THREE_OF_A_KIND;
+                        possibleHands.push(handType);
+                        break;
+                    case 1:
+                        handType = HAND_TYPE.ONE_PAIR;
+                        possibleHands.push(handType);
+                        break;
+                }
         }
     }
-    return handType;
+    console.log(possibleHands);
+    return Math.max(...possibleHands);
 }
-
-function sortHands()
 
 function getTotalWinningsAllHands(hands: string[]): number {
     let handValueDict = {};
@@ -114,7 +168,6 @@ function getTotalWinningsAllHands(hands: string[]): number {
     for (let i=0; i<hands.length; i++) {
         const handAndBid = hands[i].split(" ");
         const hand = handAndBid[0];
-        //const bid = parseInt(handAndBid[1]);
 
         // first pass just determine what type of hand it is
         // five of a kind?
@@ -152,8 +205,6 @@ function getTotalWinningsAllHands(hands: string[]): number {
         for (let i=0; i<hands.length; i++) {
             const handBid = (hands[i].split(" "))[1];
             sum += (handBid * currentRank);
-            //console.log(hands[i]);
-            //console.log(handBid * currentRank);
             currentRank++;
         }
     }
